@@ -5,10 +5,8 @@ Uso: python3 tools/gen_publicaciones.py <Listado_Publicaciones.xlsx> <Indice_Pub
 
 El formulario aporta el registro completo de carrera (tabla de publicaciones, 2013-2026);
 el listado y el índice aportan el período 2021-2026 con DOI y clasificación WoS/conferencia.
-
-Fuentes (repositorio de jerarquización, carpeta 04.-Envío_Titular_MDD):
-- Listado consolidado: hojas "Revistas WoS-JCR" y "Conferencias-Proceedings".
-- Índice de publicaciones nuevas: referencias completas para el BibTeX.
+Cada entrada se presenta con estructura de referencia IEEE: autores (nombre propio en
+negrita), título, revista o conferencia, cita y enlace DOI cuando existe.
 """
 import sys, html, re, unicodedata
 from openpyxl import load_workbook
@@ -20,7 +18,7 @@ HEAD = """<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Publicaciones · Matías Díaz</title>
-<meta name="description" content="Publicaciones de Matías Díaz (DIE USACH): revistas WoS-JCR y conferencias, período 2021-2026, con enlace DOI.">
+<meta name="description" content="Publicaciones de Matías Díaz (DIE USACH): artículos en revistas WoS-JCR y conferencias internacionales, con enlace DOI.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/site.css">
 </head>
@@ -37,7 +35,7 @@ HEAD = """<!DOCTYPE html>
 </div></nav>
 <header class="pagehead wrap">
   <h1>Publicaciones</h1>
-  <p>{n_t} publicaciones registradas entre 2013 y 2026: {n_j} artículos en revistas WoS-JCR y {n_c} en conferencias en el período 2021-2026, más {n_p} publicaciones del período 2013-2020, según el registro de la postulación a Profesor Titular (junio de 2026). Perfil completo en <a href="https://scholar.google.com/citations?user=-43YaJIAAAAJ" target="_blank" rel="noopener">Google Scholar</a> · <a href="publications.bib">BibTeX</a>.</p>
+  <p>{n_t} publicaciones científicas: {n_j} artículos en revistas WoS-JCR y {n_c} en conferencias internacionales. Perfil completo en <a href="https://scholar.google.com/citations?user=-43YaJIAAAAJ" target="_blank" rel="noopener">Google Scholar</a> · <a href="publications.bib">BibTeX</a>.</p>
 </header>
 """
 
@@ -51,8 +49,48 @@ FOOT = """
 </html>
 """
 
+CONF_KEYS = ("CONFERENCE", "PROCEEDINGS", "CONGRESS", "SYMPOSIUM", "WORKSHOP", "IECON",
+             "ICIT", "EVER", "CHILECON", "ICA-ACCA", "ICAACCA", "COBEP", "SPEC", "ARGENCON",
+             "PEDG", "ISIE", "EPE", "ECCE", "APEC", "IEEE CONF", "SEMINAR", "MEETING", "EXHIBITION")
+JOUR_KEYS = ("TRANSACTIONS", "JOURNAL", "ENERGIES", "IET ", "ACCESS", "MAGAZINE",
+             "PROCESSES", "MATHEMATICS", "RESULTS IN", "APPLIED", "PHOTOENERGY")
+
 def esc(x):
     return html.escape(str(x).strip()) if x else ""
+
+def norm(s):
+    s = unicodedata.normalize("NFKD", str(s)).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]+", "", s)
+
+def bold_me(authors):
+    """Negrita para el nombre propio en la lista de autores (ya escapada)."""
+    return re.sub(r"((?:M\.?\s*)?D[ií]az(?:-Diaz)?,?\s*M\.?|M\.?\s+D[ií]az)", r"<b>\1</b>", authors)
+
+ACRON = ("IEEE","IET","AC","DC","EV","V2G","MMC","M3C","MPC","PWM","SVM","HVDC","VSC","LVRT",
+         "PV","XXIII","ICA","ACCA","CHILECON","IECON","ICIT","EVER","SPEC","COBEP","ARGENCON",
+         "PEDG","ISIE","EPE","ECCE","APEC","USA","UK","II","III","IV")
+def fix_case(v):
+    if not v or sum(c.isupper() for c in v if c.isalpha()) < 0.7 * max(1, sum(c.isalpha() for c in v)):
+        return v
+    words = v.title().split()
+    out = []
+    for w in words:
+        wu = re.sub(r"[^A-Za-z0-9]", "", w).upper()
+        out.append(w.upper() if wu in ACRON else w)
+    return " ".join(out)
+
+def ieee_line(authors, title, venue, cita, year, url):
+    parts = []
+    if authors:
+        parts.append(bold_me(esc(authors.rstrip(".,; "))) + ",")
+    parts.append(f"“{esc(title.rstrip('. '))},”")
+    if venue:
+        parts.append(f"<em>{esc(fix_case(venue.strip(' .,;')))}</em>,")
+    if cita:
+        parts.append(f"{esc(cita)},")
+    parts.append(f"{year}.")
+    doi = f'{link(url, "DOI")}' if url else ""
+    return " ".join(parts), doi
 
 def link(url, label):
     if url and str(url).startswith("http"):
@@ -64,8 +102,56 @@ def bibkey(title, year):
     words = [w.lower() for w in re.findall(r"[A-Za-z]{4,}", t)][:3]
     return f"diaz{year}" + "".join(w[:4] for w in words)
 
+
+def strip_urls(x):
+    return re.sub(r"\s*🔗?\s*https?://\S+", "", x or "").strip(" .,;\n")
+
+def find_norm(hay, needle, nchars=30):
+    """Posición en `hay` donde parte `needle`, comparando normalizado. -1 si no está."""
+    nh, mapping = [], []
+    for i, ch in enumerate(hay):
+        c = unicodedata.normalize("NFKD", ch).encode("ascii", "ignore").decode().lower()
+        c = re.sub(r"[^a-z0-9]", "", c)
+        if c:
+            nh.append(c[0]); mapping.append(i)
+    nn = norm(needle)[:nchars]
+    if not nn:
+        return -1
+    pos = "".join(nh).find(nn)
+    return mapping[pos] if pos >= 0 else -1
+
+def load_authors_index(indice):
+    """Mapa título normalizado -> lista de autores, desde el índice de publicaciones nuevas."""
+    wb = load_workbook(indice, data_only=True)
+    ws = wb.active
+    out = {}
+    for r in ws.iter_rows(min_row=2, values_only=True):
+        n, year, tipo, title, url, ref = (list(r) + [None] * 8)[:6]
+        if not (title and ref):
+            continue
+        ref = re.sub(r"\s+", " ", strip_urls(str(ref)))
+        key = norm(title)
+        pos = find_norm(ref, str(title))
+        if pos > 5:
+            authors = ref[:pos].strip(" .,")
+        elif pos == -1:
+            authors = ref  # ref sin título: solo autores
+        else:
+            authors = ref[pos + len(str(title)):].strip(" .,")  # formato título-primero
+        out[key] = authors
+    return out
+
+def lookup_authors(ix, title):
+    key = norm(title)
+    if key in ix:
+        return ix[key]
+    for k, v in ix.items():
+        if k[:25] and (k.startswith(key[:25]) or key.startswith(k[:25])):
+            return v
+    return ""
+
 def prev_pubs(formulario):
-    """Extrae del formulario las publicaciones con fecha hasta 2020."""
+    """Registro de carrera con fecha hasta 2020: (año, autores, título, venue)."""
     doc = docx.Document(formulario)
     tab = None
     for t in doc.tables:
@@ -82,58 +168,115 @@ def prev_pubs(formulario):
         yr = int(m.group(0)) if m else None
         if yr is None or yr > 2020:
             continue
-        ref = re.sub(r"\s+", " ", cells[4]) or cells[0].title()
-        out.append((yr, ref))
+        title_raw = re.sub(r"\s+", " ", cells[0]).strip()
+        ref = re.sub(r"\s+", " ", strip_urls(cells[4]))
+        authors, title, venue = "", title_raw.title(), ""
+        if ref:
+            pos = find_norm(ref, title_raw)
+            if pos > 5:
+                authors = ref[:pos].strip(" .,")
+                title = ref[pos:pos + len(title_raw)].strip(" .")
+                venue = ref[pos + len(title_raw):].strip(" .,")
+            elif pos == 0:
+                title = ref[:len(title_raw)].strip(" .")
+                venue = ref[len(title_raw):].strip(" .,")
+            else:
+                authors = ref
+        out.append((yr, authors, title, venue))
     return out
+
+def classify(venue, title=""):
+    v = (venue + " " + title).upper()
+    if any(k in v for k in CONF_KEYS):
+        return "conf"
+    if any(k in v for k in JOUR_KEYS):
+        return "journal"
+    return "conf"
+
+def sanitize(authors, venue):
+    authors = re.sub(r"https?://\S+", "", authors or "").strip(" .,;")
+    venue = re.sub(r"https?://\S+", "", venue or "").strip(" .,;")
+    venue = re.sub(r"\s+", " ", venue)
+    authors = re.sub(r"\s+", " ", authors)
+    up = venue.upper()
+    is_venue = any(k in up for k in CONF_KEYS + JOUR_KEYS + ("IEEE", "INTERNATIONAL", "REVISTA", "SPRINGER", "MDPI", "ELSEVIER"))
+    # venue que en realidad es lista de autores (refs con formato titulo-primero)
+    if venue and not is_venue and len(re.findall(r",\s*[A-Z]", venue)) >= 2:
+        if len(authors) < 6:
+            authors, venue = venue, ""
+    if len(authors) < 6:
+        authors = ""
+    return authors, venue
+
+# Correcciones puntuales verificadas en Crossref (título -> autores);
+# y DOI incorrecto detectado: el de la review de MMC apunta a otro paper.
+AUTHOR_OVERRIDES = {
+    "conditionmonitoringofsubmodulecapacitors": "Saravanakumar R., Sivakumar N., Kirthika Devi V.S., Shanthini C., Jena D., Ibaceta E., Diaz M., Rodriguez J.",
+}
+DOI_DROP = {"reviewofmodularmultilevelconvertersappliedtohigh": "https://doi.org/10.1109/CHILECON47746.2019.8988098"}
+
+def render_entry(out, authors, title, venue, cita, year, url):
+    k = norm(title)[:48]
+    for ok, ov in AUTHOR_OVERRIDES.items():
+        if k.startswith(ok):
+            authors = ov
+    for dk, du in DOI_DROP.items():
+        if k.startswith(dk) and url == du:
+            url = None
+    authors, venue = sanitize(authors, venue)
+    body, doi = ieee_line(authors, title, venue, cita, year, url)
+    links = f'<div class="links">{doi}<span>{year}</span></div>' if doi else f'<div class="links"><span>{year}</span></div>'
+    thumb = esc(str(venue).split()[0][:10]) if venue else str(year)
+    out.append(f'<div class="pub"><div class="thumb">{thumb}</div><div><p>{body}</p>{links}</div></div>')
 
 def main(listado, indice, formulario):
     wb = load_workbook(listado, data_only=True)
-    def _yr(v):
-        try: return int(v)
-        except (TypeError, ValueError): return None
-    js = [r for r in wb["Revistas WoS-JCR"].iter_rows(min_row=2, values_only=True) if _yr(r[1]) and r[2]]
-    cs = [r for r in wb["Conferencias-Proceedings"].iter_rows(min_row=2, values_only=True) if _yr(r[1]) and r[2]]
 
-    prev = prev_pubs(formulario)
-    old_cs = [r for r in cs if int(r[1]) <= 2020]
-    cs = [r for r in cs if int(r[1]) > 2020]
-    for r in old_cs:
-        prev.append((int(r[1]), f"{r[2]}. {r[3] or 'Proceedings'}."))
-    out = [HEAD.format(n_j=len(js), n_c=len(cs), n_p=len(prev), n_t=len(js) + len(cs) + len(prev))]
+    def _yr(v):
+        try:
+            return int(v)
+        except (TypeError, ValueError):
+            return None
+
+    authors_ix = load_authors_index(indice)
+    journals, confs = [], []
+
+    for r in wb["Revistas WoS-JCR"].iter_rows(min_row=2, values_only=True):
+        if not (_yr(r[1]) and r[2]):
+            continue
+        _, y, title, journal, cita, _, url = (list(r) + [None] * 7)[:7]
+        journal = journal if journal and "verificar" not in str(journal) else ""
+        journals.append((int(y), lookup_authors(authors_ix, title), str(title), str(journal), cita, url))
+
+    for r in wb["Conferencias-Proceedings"].iter_rows(min_row=2, values_only=True):
+        if not (_yr(r[1]) and r[2]):
+            continue
+        _, y, title, fuente, url = (list(r) + [None] * 5)[:5]
+        confs.append((int(y), lookup_authors(authors_ix, title), str(title), str(fuente or ""), None, url))
+
+    for yr, authors, title, venue in prev_pubs(formulario):
+        entry = (yr, authors, title, venue, None, None)
+        (journals if classify(venue, title) == "journal" else confs).append(entry)
+
+    journals.sort(key=lambda e: -e[0])
+    confs.sort(key=lambda e: -e[0])
+
+    out = [HEAD.format(n_j=len(journals), n_c=len(confs), n_t=len(journals) + len(confs))]
 
     out.append('<section style="padding-top:40px"><div class="wrap"><div class="head"><h2>Revistas WoS-JCR</h2></div>')
-    for year in sorted({int(r[1]) for r in js}, reverse=True):
+    for year in sorted({e[0] for e in journals}, reverse=True):
         out.append(f'<div class="pubyear">{year}</div>')
-        for r in [x for x in js if int(x[1]) == year]:
-            _, y, title, journal, cita, _, url = (list(r) + [None]*7)[:7]
-            rev = esc(journal) if journal and "verificar" not in str(journal) else "Revista"
-            cita_txt = f", {esc(cita)}" if cita else ""
-            out.append(
-                f'<div class="pub"><div class="thumb">{rev.split()[0][:10]}</div><div>'
-                f'<p>{esc(title)}. <em>{rev}{cita_txt}.</em></p>'
-                f'<div class="links">{link(url, "DOI")}<span>{year}</span></div></div></div>')
+        for e in journals:
+            if e[0] == year:
+                render_entry(out, e[1], e[2], e[3], e[4], e[0], e[5])
     out.append("</div></section>")
 
-    out.append('<section class="alt"><div class="wrap"><div class="head"><h2>Conferencias y proceedings</h2></div>')
-    for year in sorted({int(r[1]) for r in cs}, reverse=True):
+    out.append('<section class="alt"><div class="wrap"><div class="head"><h2>Conferencias internacionales</h2></div>')
+    for year in sorted({e[0] for e in confs}, reverse=True):
         out.append(f'<div class="pubyear">{year}</div>')
-        for r in cs:
-            if int(r[1]) != year:
-                continue
-            _, y, title, fuente, url = (list(r) + [None]*5)[:5]
-            out.append(
-                f'<div class="pub"><div class="thumb">Conf.</div><div>'
-                f'<p>{esc(title)}. <em>{esc(fuente) or "Proceedings"}.</em></p>'
-                f'<div class="links">{link(url, "DOI")}<span>{year}</span></div></div></div>')
-    out.append("</div></section>")
-
-    out.append('<section><div class="wrap"><div class="head"><h2>Publicaciones 2013-2020</h2><p>Revistas y conferencias del período previo, según el registro de antecedentes académicos.</p></div>')
-    for year in sorted({p[0] for p in prev}, reverse=True):
-        out.append(f'<div class="pubyear">{year}</div>')
-        for y, ref in prev:
-            if y != year:
-                continue
-            out.append(f'<div class="pub"><div class="thumb">{year}</div><div><p>{esc(ref)}</p></div></div>')
+        for e in confs:
+            if e[0] == year:
+                render_entry(out, e[1], e[2], e[3], e[4], e[0], e[5])
     out.append("</div></section>")
     out.append(FOOT)
 
@@ -145,14 +288,14 @@ def main(listado, indice, formulario):
     ws = wb2.active
     bibs, seen = [], set()
     for r in ws.iter_rows(min_row=2, values_only=True):
-        n, year, tipo, title, url, ref = (list(r) + [None]*8)[:6]
+        n, year, tipo, title, url, ref = (list(r) + [None] * 8)[:6]
         if not (year and title):
             continue
         key = bibkey(str(title), year)
         while key in seen:
             key += "x"
         seen.add(key)
-        entry = "article" if tipo and "WOS" in str(tipo).upper() else ("article" if tipo and "revista" in str(tipo).lower() else "inproceedings")
+        entry = "article" if tipo and ("WOS" in str(tipo).upper() or "revista" in str(tipo).lower()) else "inproceedings"
         doi = ""
         if url and "doi.org/" in str(url):
             doi = str(url).split("doi.org/")[-1].strip()
@@ -164,9 +307,9 @@ def main(listado, indice, formulario):
             + (f"  note = {{{str(ref).strip()[:300]}}},\n" if ref else "")
             + "}\n")
     with open("publications.bib", "w", encoding="utf-8") as f:
-        f.write("% Publicaciones de Matías Díaz, período 2021-2026.\n"
+        f.write("% Publicaciones de Matías Díaz.\n"
                 "% Generado desde 00_INDICE_Publicaciones_Nuevas_2021-2026.xlsx.\n\n" + "\n".join(bibs))
-    print(f"OK: {len(js)} revistas, {len(cs)} conferencias, {len(bibs)} entradas BibTeX")
+    print(f"OK: {len(journals)} revistas, {len(confs)} conferencias, total {len(journals)+len(confs)}, {len(bibs)} BibTeX")
 
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], sys.argv[3])
