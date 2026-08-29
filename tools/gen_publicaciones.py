@@ -8,7 +8,7 @@ el listado y el índice aportan el período 2021-2026 con DOI y clasificación W
 Cada entrada se presenta con estructura de referencia IEEE: autores (nombre propio en
 negrita), título, revista o conferencia, cita y enlace DOI cuando existe.
 """
-import sys, html, re, unicodedata
+import sys, html, re, unicodedata, json, os
 from openpyxl import load_workbook
 import docx
 
@@ -32,6 +32,7 @@ HEAD = """<!DOCTYPE html>
   <a href="docencia.html">Docencia</a>
   <a href="equipo.html">Equipo</a>
   <a href="postula.html">Postula</a>
+  <a href="cv.html">CV</a>
 </div></nav>
 <header class="pagehead wrap">
   <h1>Publicaciones</h1>
@@ -193,6 +194,31 @@ def classify(venue, title=""):
         return "journal"
     return "conf"
 
+CODE_NAMES = {
+    "ICAACCA": "IEEE International Conference on Automation / Congress of the Chilean Association of Automatic Control (ICA-ACCA)",
+    "ICA-ACCA": "IEEE International Conference on Automation / Congress of the Chilean Association of Automatic Control (ICA-ACCA)",
+    "CHILECON": "IEEE CHILEAN Conference on Electrical, Electronics Engineering, Information and Communication Technologies (CHILECON)",
+    "EVER": "International Conference on Ecological Vehicles and Renewable Energies (EVER)",
+    "ARGENCON": "IEEE Biennial Congress of Argentina (ARGENCON)",
+    "SMART": "International Conference on Sustainable Mobility Applications, Renewables and Technology (SMART)",
+    "INGELECTRA": "Congreso INGELECTRA",
+    "IECON": "Annual Conference of the IEEE Industrial Electronics Society (IECON)",
+    "ICIT": "IEEE International Conference on Industrial Technology (ICIT)",
+    "SPEC": "IEEE Southern Power Electronics Conference (SPEC)",
+}
+_vjson = os.path.join(os.path.dirname(os.path.abspath(__file__)), "venues_conferencias.json")
+VENUES = json.load(open(_vjson)) if os.path.exists(_vjson) else {}
+
+def conf_venue(title, fuente, url):
+    k = norm(title)[:48]
+    if k in VENUES:
+        return VENUES[k]["venue"], (VENUES[k]["doi"] or None)
+    m = re.search(r"10\.1109/([A-Za-z-]+)", str(url or ""))
+    if m and m.group(1).upper() in CODE_NAMES:
+        return CODE_NAMES[m.group(1).upper()], None
+    f = str(fuente or "").strip()
+    return ("IEEE Conference" if f in ("", "IEEE Conf.", "IEEE Conf") else f), None
+
 def sanitize(authors, venue):
     authors = re.sub(r"https?://\S+", "", authors or "").strip(" .,;")
     venue = re.sub(r"https?://\S+", "", venue or "").strip(" .,;")
@@ -252,7 +278,8 @@ def main(listado, indice, formulario):
         if not (_yr(r[1]) and r[2]):
             continue
         _, y, title, fuente, url = (list(r) + [None] * 5)[:5]
-        confs.append((int(y), lookup_authors(authors_ix, title), str(title), str(fuente or ""), None, url))
+        venue, doi2 = conf_venue(title, fuente, url)
+        confs.append((int(y), lookup_authors(authors_ix, title), str(title), venue, None, url or doi2))
 
     for yr, authors, title, venue in prev_pubs(formulario):
         entry = (yr, authors, title, venue, None, None)

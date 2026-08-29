@@ -27,6 +27,7 @@ HEAD = """<!DOCTYPE html>
   <a href="docencia.html">Docencia</a>
   <a href="equipo.html">Equipo</a>
   <a href="postula.html">Postula</a>
+  <a href="cv.html">CV</a>
 </div></nav>
 <header class="pagehead wrap">
   <h1>Prensa</h1>
