@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""Genera publicaciones.html y publications.bib desde los Excel de la jerarquización.
+"""Genera publicaciones.html y publications.bib desde los antecedentes de la jerarquización.
 
-Uso: python3 tools/gen_publicaciones.py <Listado_Publicaciones.xlsx> <Indice_Pubs_Nuevas.xlsx>
+Uso: python3 tools/gen_publicaciones.py <Listado_Publicaciones.xlsx> <Indice_Pubs_Nuevas.xlsx> <Formulario_vfinal.docx>
+
+El formulario aporta el registro completo de carrera (tabla de publicaciones, 2013-2026);
+el listado y el índice aportan el período 2021-2026 con DOI y clasificación WoS/conferencia.
 
 Fuentes (repositorio de jerarquización, carpeta 04.-Envío_Titular_MDD):
 - Listado consolidado: hojas "Revistas WoS-JCR" y "Conferencias-Proceedings".
@@ -9,6 +12,7 @@ Fuentes (repositorio de jerarquización, carpeta 04.-Envío_Titular_MDD):
 """
 import sys, html, re, unicodedata
 from openpyxl import load_workbook
+import docx
 
 HEAD = """<!DOCTYPE html>
 <html lang="es">
@@ -33,7 +37,7 @@ HEAD = """<!DOCTYPE html>
 </div></nav>
 <header class="pagehead wrap">
   <h1>Publicaciones</h1>
-  <p>{n_j} artículos en revistas WoS-JCR y {n_c} en conferencias en el período 2021-2026, según el índice consolidado de la postulación a Profesor Titular (junio de 2026). Perfil completo en <a href="https://scholar.google.com/citations?user=-43YaJIAAAAJ" target="_blank" rel="noopener">Google Scholar</a> · <a href="publications.bib">BibTeX</a>.</p>
+  <p>{n_t} publicaciones registradas entre 2013 y 2026: {n_j} artículos en revistas WoS-JCR y {n_c} en conferencias en el período 2021-2026, más {n_p} publicaciones del período 2013-2020, según el registro de la postulación a Profesor Titular (junio de 2026). Perfil completo en <a href="https://scholar.google.com/citations?user=-43YaJIAAAAJ" target="_blank" rel="noopener">Google Scholar</a> · <a href="publications.bib">BibTeX</a>.</p>
 </header>
 """
 
@@ -60,7 +64,29 @@ def bibkey(title, year):
     words = [w.lower() for w in re.findall(r"[A-Za-z]{4,}", t)][:3]
     return f"diaz{year}" + "".join(w[:4] for w in words)
 
-def main(listado, indice):
+def prev_pubs(formulario):
+    """Extrae del formulario las publicaciones con fecha hasta 2020."""
+    doc = docx.Document(formulario)
+    tab = None
+    for t in doc.tables:
+        head = " ".join(c.text for c in t.rows[1].cells) if len(t.rows) > 1 else ""
+        if "NOMBRE DE LA PUBLICACI" in head and len(t.rows) > 100:
+            tab = t
+            break
+    out = []
+    for r in tab.rows[2:]:
+        cells = [c.text.strip() for c in r.cells]
+        if not cells[0]:
+            continue
+        m = re.search(r"(19|20)\d{2}", cells[5])
+        yr = int(m.group(0)) if m else None
+        if yr is None or yr > 2020:
+            continue
+        ref = re.sub(r"\s+", " ", cells[4]) or cells[0].title()
+        out.append((yr, ref))
+    return out
+
+def main(listado, indice, formulario):
     wb = load_workbook(listado, data_only=True)
     def _yr(v):
         try: return int(v)
@@ -68,7 +94,8 @@ def main(listado, indice):
     js = [r for r in wb["Revistas WoS-JCR"].iter_rows(min_row=2, values_only=True) if _yr(r[1]) and r[2]]
     cs = [r for r in wb["Conferencias-Proceedings"].iter_rows(min_row=2, values_only=True) if _yr(r[1]) and r[2]]
 
-    out = [HEAD.format(n_j=len(js), n_c=len(cs))]
+    prev = prev_pubs(formulario)
+    out = [HEAD.format(n_j=len(js), n_c=len(cs), n_p=len(prev), n_t=len(js) + len(cs) + len(prev))]
 
     out.append('<section style="padding-top:40px"><div class="wrap"><div class="head"><h2>Revistas WoS-JCR</h2></div>')
     for year in sorted({int(r[1]) for r in js}, reverse=True):
@@ -94,6 +121,15 @@ def main(listado, indice):
                 f'<div class="pub"><div class="thumb">Conf.</div><div>'
                 f'<p>{esc(title)}. <em>{esc(fuente) or "Proceedings"}.</em></p>'
                 f'<div class="links">{link(url, "DOI")}<span>{year}</span></div></div></div>')
+    out.append("</div></section>")
+
+    out.append('<section><div class="wrap"><div class="head"><h2>Publicaciones 2013-2020</h2><p>Revistas y conferencias del período previo, según el registro de antecedentes académicos.</p></div>')
+    for year in sorted({p[0] for p in prev}, reverse=True):
+        out.append(f'<div class="pubyear">{year}</div>')
+        for y, ref in prev:
+            if y != year:
+                continue
+            out.append(f'<div class="pub"><div class="thumb">{year}</div><div><p>{esc(ref)}</p></div></div>')
     out.append("</div></section>")
     out.append(FOOT)
 
@@ -129,4 +165,4 @@ def main(listado, indice):
     print(f"OK: {len(js)} revistas, {len(cs)} conferencias, {len(bibs)} entradas BibTeX")
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main(sys.argv[1], sys.argv[2], sys.argv[3])
