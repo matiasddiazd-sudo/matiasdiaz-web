@@ -95,6 +95,10 @@ def main(listado, indice, formulario):
     cs = [r for r in wb["Conferencias-Proceedings"].iter_rows(min_row=2, values_only=True) if _yr(r[1]) and r[2]]
 
     prev = prev_pubs(formulario)
+    old_cs = [r for r in cs if int(r[1]) <= 2020]
+    cs = [r for r in cs if int(r[1]) > 2020]
+    for r in old_cs:
+        prev.append((int(r[1]), f"{r[2]}. {r[3] or 'Proceedings'}."))
     out = [HEAD.format(n_j=len(js), n_c=len(cs), n_p=len(prev), n_t=len(js) + len(cs) + len(prev))]
 
     out.append('<section style="padding-top:40px"><div class="wrap"><div class="head"><h2>Revistas WoS-JCR</h2></div>')
