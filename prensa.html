@@ -3,27 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prensa · Matías Díaz</title>
-<meta name="description" content="Apariciones en prensa de Matías Díaz (DIE USACH): electromovilidad, carga de vehículos eléctricos y almacenamiento, 2014-2026.">
+<title>Prensa y videos · Matías Díaz</title>
+<meta name="description" content="Apariciones en prensa, entrevistas en video y clases de Matías Díaz (DIE USACH): electromovilidad, carga de vehículos eléctricos y almacenamiento, 2014-2026.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/site.css">
+<style>
+.ytgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px 18px}
+.caro{position:relative}
+.track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 14px;scrollbar-width:thin}
+.slide{flex:0 0 260px;scroll-snap-align:start;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;color:var(--ink);display:flex;flex-direction:column}
+.slide:hover{border-color:var(--volt-deep);text-decoration:none}
+.slide img{width:100%;aspect-ratio:3/4;object-fit:cover;object-position:top;display:block;background:#fff}
+.slide .cap{padding:12px 14px 14px}
+.slide h3{font:600 13.5px/1.35 "Archivo",sans-serif;margin-bottom:5px}
+.slide p{color:var(--dim);font-size:11.5px}
+.cbtn{position:absolute;top:38%;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(10,14,19,.85);color:var(--volt);font-size:18px;cursor:pointer;z-index:3}
+.cbtn:hover{border-color:var(--volt)}
+.cbtn.prev{left:-8px} .cbtn.next{right:-8px}
+@media(max-width:700px){.cbtn{display:none}}
+</style>
 </head>
 <body>
 <nav><div class="wrap">
   <a class="logo" href="index.html">Matías <b>Díaz</b></a>
   <a href="investigacion.html">Investigación</a>
   <a href="publicaciones.html">Publicaciones</a>
-  <a href="videos.html">Videos</a>
-  <a class="on" href="prensa.html">Prensa</a>
+  <a class="on" href="prensa.html">Prensa y videos</a>
   <a href="docencia.html">Docencia</a>
   <a href="equipo.html">Equipo</a>
   <a href="postula.html">Postula</a>
   <a href="cv.html">CV</a>
 </div></nav>
 <header class="pagehead wrap">
-  <h1>Prensa</h1>
-  <p>102 apariciones registradas entre 2014 y 2026 en prensa escrita, radio y televisión, sobre electromovilidad, carga de vehículos eléctricos, baterías y política energética.</p>
+  <h1>Prensa y videos</h1>
+  <p>102 apariciones registradas entre 2014 y 2026 en prensa escrita, radio y televisión, junto a entrevistas en video y una selección del <a href="https://www.youtube.com/@matiasdiazd7977" target="_blank" rel="noopener">canal de YouTube</a>: clases de control y electrónica de potencia y seminarios del Diplomado en Electromovilidad USACH.</p>
 </header>
+
 <section style="padding-top:40px"><div class="wrap">
   <div class="head"><h2>Destacadas</h2></div>
   <div class="quotes">
@@ -35,6 +50,110 @@
     <div class="q"><p>El potencial del retrofit en Chile, columna de opinión</p><span>Cooperativa.cl · 2025</span></div>
   </div>
 </div></section>
+
+<section class="alt"><div class="wrap">
+  <div class="head"><h2>Archivo de prensa</h2>
+  <p>Selección de notas y reportajes en su versión original. Cada portada abre el PDF completo.</p></div>
+  <div class="caro">
+    <button class="cbtn prev" aria-label="Anterior">‹</button>
+    <div class="track" id="ptrack">
+    <a class="slide" href="assets/prensa/lun-reportaje-2020.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/lun-reportaje-2020.jpg" alt="Doctor en ingeniería cuenta cómo escogió su auto eléctrico" loading="lazy">
+      <div class="cap"><h3>Doctor en ingeniería cuenta cómo escogió su auto eléctrico</h3><p>Las Últimas Noticias · 2020 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/lun-escarabajo-e2-2023.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/lun-escarabajo-e2-2023.jpg" alt="La joyita: Escarabajo 1982 reconvertido en eléctrico con el primer cargador hecho en Chile" loading="lazy">
+      <div class="cap"><h3>La joyita: Escarabajo 1982 reconvertido en eléctrico con el primer cargador hecho en Chile</h3><p>Las Últimas Noticias · 2023 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/radio-usach-electromovilidad.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/radio-usach-electromovilidad.jpg" alt="“Mientras no tengamos una política de incentivos, la gente no se va a cambiar a un auto eléctrico”" loading="lazy">
+      <div class="cap"><h3>“Mientras no tengamos una política de incentivos, la gente no se va a cambiar a un auto eléctrico”</h3><p>Radio Usach · 2020 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/electromov-v2g-2019.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/electromov-v2g-2019.jpg" alt="Usach prepara primeras pruebas Vehicle-to-Grid de Latinoamérica" loading="lazy">
+      <div class="cap"><h3>Usach prepara primeras pruebas Vehicle-to-Grid de Latinoamérica</h3><p>ElectroMOV.cl · 2019 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/usach-e2tech.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/usach-e2tech.jpg" alt="Programa Centro E2Tech se proyecta como líder nacional en electromovilidad" loading="lazy">
+      <div class="cap"><h3>Programa Centro E2Tech se proyecta como líder nacional en electromovilidad</h3><p>Usach al Día · 2020 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/electricidad-laboratorios-2020.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/electricidad-laboratorios-2020.jpg" alt="Laboratorios: hojas de ruta para el futuro de la electromovilidad" loading="lazy">
+      <div class="cap"><h3>Laboratorios: hojas de ruta para el futuro de la electromovilidad</h3><p>ElectroMOV.cl · 2020 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/academia-premio-tesis-2018.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/academia-premio-tesis-2018.jpg" alt="Premio a la Mejor Tesis de Doctorado 2018, Academia Chilena de Ciencias" loading="lazy">
+      <div class="cap"><h3>Premio a la Mejor Tesis de Doctorado 2018, Academia Chilena de Ciencias</h3><p>Academia Chilena de Ciencias · 2019 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/explora-premio-tesis-2018.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/explora-premio-tesis-2018.jpg" alt="Los mejores doctores de 2018" loading="lazy">
+      <div class="cap"><h3>Los mejores doctores de 2018</h3><p>Conicyt · 2019 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/fcfm-doble-titulacion.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/fcfm-doble-titulacion.jpg" alt="FCFM y U. de Nottingham gradúan a su primer doctor con doble titulación en ingeniería eléctrica" loading="lazy">
+      <div class="cap"><h3>FCFM y U. de Nottingham gradúan a su primer doctor con doble titulación en ingeniería eléctrica</h3><p>Universidad de Chile · 2017 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/gerencia-2019.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/gerencia-2019.jpg" alt="Respaldo de energía en data centers: hacia una mayor eficiencia" loading="lazy">
+      <div class="cap"><h3>Respaldo de energía en data centers: hacia una mayor eficiencia</h3><p>Revista Gerencia · 2019 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/biobio-concurso-electromovilidad.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/biobio-concurso-electromovilidad.jpg" alt="Auto “Surya II” es la nueva apuesta de transporte eléctrico para Chile" loading="lazy">
+      <div class="cap"><h3>Auto “Surya II” es la nueva apuesta de transporte eléctrico para Chile</h3><p>BioBioChile · 2015 · PDF</p></div>
+    </a>
+    <a class="slide" href="assets/prensa/el-mostrador-2016.pdf" target="_blank" rel="noopener">
+      <img src="assets/prensa/el-mostrador-2016.jpg" alt="El difícil camino para intentar hacer ciencia en Chile (columna de opinión)" loading="lazy">
+      <div class="cap"><h3>El difícil camino para intentar hacer ciencia en Chile (columna de opinión)</h3><p>El Mostrador · 2015 · PDF</p></div>
+    </a>
+    </div>
+    <button class="cbtn next" aria-label="Siguiente">›</button>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="head"><h2>Entrevistas en video</h2>
+  <p>Entrevistas y reportajes en televisión, radio y medios digitales.</p></div>
+  <div class="ytgrid">
+    <div><div class="yt" data-id="zAEqCILX4pA"></div><div class="ytmeta"><h3>Baterías reutilizadas energizarán espacio de Lollapalooza Chile 2026</h3><p>Cooperativa Ciencia · entrevista · 2026</p></div></div>
+    <div><div class="yt" data-id="Kj6LrNkHp_Q"></div><div class="ytmeta"><h3>Expertos Usach piden mesa técnica para regular baterías de litio en Chile</h3><p>Radio Usach · 2026</p></div></div>
+    <div><div class="yt" data-id="fiS6_V9wRqo"></div><div class="ytmeta"><h3>El primer cargador de autos eléctricos nacional</h3><p>¿Cuál es tu huella? · TVN / 24 Horas · 2024</p></div></div>
+    <div><div class="yt" data-id="iBpzLcPELGA"></div><div class="ytmeta"><h3>Usach finaliza con éxito el primer cargador para autos eléctricos hecho en Chile</h3><p>Reportaje · 2024</p></div></div>
+    <div><div class="yt" data-id="OD5StnSSaxI"></div><div class="ytmeta"><h3>Cómo la Usach eliminó el diésel del festival más grande de Chile</h3><p>CC Informa · 2026</p></div></div>
+    <div><div class="yt" data-id="ryqY88UYAno"></div><div class="ytmeta"><h3>“Hay que ser cuidadosos con los scooters”</h3><p>Radio Usach · Diplomado en Electromovilidad</p></div></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="head"><h2>Los más vistos</h2></div>
+  <div class="ytgrid">
+    <div><div class="yt" data-id="_Zu9b6ubFFI"></div><div class="ytmeta"><h3>Transformadas de Clarke y Park</h3><p>Clase · 14 mil vistas</p></div></div>
+    <div><div class="yt" data-id="dtUdz1-P6oQ"></div><div class="ytmeta"><h3>Diseñar un controlador PI en 5 minutos usando Matlab</h3><p>Clase práctica · 5,1 mil vistas</p></div></div>
+    <div><div class="yt" data-id="KrXJktdm4WI"></div><div class="ytmeta"><h3>Clase 1 · Electrónica de Potencia</h3><p>Curso de electrónica de potencia · 2 mil vistas</p></div></div>
+  </div>
+</div></section>
+
+<section class="alt"><div class="wrap">
+  <div class="head"><h2>Electromovilidad</h2><p>Seminarios y charlas abiertas del Diplomado en Electromovilidad USACH.</p></div>
+  <div class="ytgrid">
+    <div><div class="yt" data-id="C_WGky-9zWU"></div><div class="ytmeta"><h3>Desafíos de la electromovilidad al 2030</h3><p>Seminario del Diplomado</p></div></div>
+    <div><div class="yt" data-id="9pm30UoqSwc"></div><div class="ytmeta"><h3>Tendencias y desafíos del retrofit</h3><p>Seminario del Diplomado</p></div></div>
+    <div><div class="yt" data-id="4aWxdi-Ph-k"></div><div class="ytmeta"><h3>Electromovilidad en Chile: políticas públicas y tecnología</h3><p>Clase abierta</p></div></div>
+    <div><div class="yt" data-id="MxLSy4l_RZQ"></div><div class="ytmeta"><h3>Electromovilidad: el camino a un transporte sustentable</h3><p>Webinar</p></div></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="head"><h2>Control y máquinas eléctricas</h2><p>Material docente de cursos de pregrado y postgrado del DIE USACH.</p></div>
+  <div class="ytgrid">
+    <div><div class="yt" data-id="5mluvD0_njw"></div><div class="ytmeta"><h3>Control orientado en el campo · máquina de inducción</h3><p>Clase · 2 mil vistas</p></div></div>
+    <div><div class="yt" data-id="I9vfzQ3dzjg"></div><div class="ytmeta"><h3>Convertidor controlado conectado a la red</h3><p>Clase</p></div></div>
+    <div><div class="yt" data-id="xzaWo8i8XAU"></div><div class="ytmeta"><h3>Control vectorial directo vs indirecto</h3><p>Clase</p></div></div>
+    <div><div class="yt" data-id="uwFMwvpyY5A"></div><div class="ytmeta"><h3>Hardware in the loop y rapid control prototyping</h3><p>Seminario</p></div></div>
+    <div><div class="yt" data-id="bDC6BVoT1L4"></div><div class="ytmeta"><h3>Diseño de controladores PID</h3><p>Clase · 1,1 mil vistas</p></div></div>
+    <div><div class="yt" data-id="b6xJG9_CAnY"></div><div class="ytmeta"><h3>Taller de control de máquina DC</h3><p>Taller práctico · 1,5 mil vistas</p></div></div>
+  </div>
+</div></section>
+
 <section class="alt"><div class="wrap">
   <div class="head"><h2>Registro completo</h2><p>Índice consolidado presentado en la postulación a Profesor Titular (junio de 2026).</p></div>
 
@@ -159,10 +278,18 @@
 <tr><td>18-nov-2021</td><td>El Mercurio</td><td>Electricidad y tecnologías para una movilidad más limpia, inteligente y confortable</td><td>Electromovilidad</td></tr>
 </table></div>
 </div></section>
+
 <footer><div class="wrap">
   <span>© 2026 Matías Díaz · DIE USACH</span>
-  <span>Generado desde el índice consolidado de prensa</span>
+  <span><a href="https://www.youtube.com/@matiasdiazd7977" target="_blank" rel="noopener">YouTube</a> · Registro consolidado de prensa</span>
 </div></footer>
 <script src="assets/site.js"></script>
+<script>
+(function(){
+  var t=document.getElementById('ptrack');
+  document.querySelector('.cbtn.prev').addEventListener('click',function(){t.scrollBy({left:-560,behavior:'smooth'})});
+  document.querySelector('.cbtn.next').addEventListener('click',function(){t.scrollBy({left:560,behavior:'smooth'})});
+})();
+</script>
 </body>
 </html>
