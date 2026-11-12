@@ -129,3 +129,4 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .reveal.in{opacity:1;transform:none;transition:opacity .6s ease,transform .6s ease}
 @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}html{scroll-behavior:auto}}
 a:focus-visible{outline:2px solid var(--volt);outline-offset:3px}
+.vcard.res .txt{padding-top:44px;background:linear-gradient(transparent,rgba(6,10,14,.93) 34%)}
