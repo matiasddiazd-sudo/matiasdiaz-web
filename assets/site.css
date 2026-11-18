@@ -140,3 +140,4 @@ a:focus-visible{outline:2px solid var(--volt);outline-offset:3px}
 .tray{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:44px;align-items:start}
 .tray h3{font:400 26px/1.15 "Instrument Serif",serif;margin-bottom:20px}
 .tray .tl{gap:14px;padding-left:20px}
+.tl .tlfoto{display:block;margin-top:12px;width:100%;max-width:260px;height:auto;border-radius:10px;border:1px solid var(--line)}
